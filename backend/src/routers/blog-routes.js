@@ -2,6 +2,7 @@ const {
   getAllBlogController,
   getOneBlogController,
   createBlogController,
+  updateBlogController,
 } = require("../controllers/blog-controllers");
 const {
   checkIdMiddleware,
@@ -23,6 +24,14 @@ blogRoute.post(
   uploadFile.single("image"),
   createBlogValidation,
   createBlogController
+);
+
+// PUT /api/blog/update - update a  blog
+blogRoute.put(
+  "/update/:id",
+  uploadFile.single("image"),
+  createBlogValidation,
+  updateBlogController
 );
 
 module.exports = blogRoute;

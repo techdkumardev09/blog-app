@@ -82,8 +82,49 @@ const createBlogController = async (req, res) => {
   }
 };
 
+// update a blog post controller with id
+const updateBlogController = async (req, res) => {
+  const blogId = req.params.id;
+  const { title, authorName, description } = req.body;
+  try {
+    const existingBlog = await Blog.findById(blogId);
+
+    if (!existingBlog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+    existingBlog.title = title;
+    existingBlog.authorName = authorName;
+    existingBlog.description = description;
+    if (req.file !== undefined) {
+      existingBlog.image = fs.readFileSync(
+        path.join(__dirname, "../../uploads/") + req.file.filename
+      );
+    }
+
+    // Save the updated blog post
+    await existingBlog.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog updated successfully",
+      blog: existingBlog,
+    });
+  } catch (err) {
+    console.log("Error:", err);
+    return res.status(400).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
 module.exports = {
   getAllBlogController,
   getOneBlogController,
   createBlogController,
+  updateBlogController,
 };
