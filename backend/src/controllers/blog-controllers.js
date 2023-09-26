@@ -1,4 +1,6 @@
 const Blog = require("../models/blog-models");
+const path = require("path");
+const fs = require("fs");
 
 // get all blog posts controller
 const getAllBlogController = async (req, res) => {
@@ -43,4 +45,45 @@ const getOneBlogController = async (req, res) => {
   }
 };
 
-module.exports = { getAllBlogController, getOneBlogController };
+// create a new blog post controller
+const createBlogController = async (req, res) => {
+  try {
+    // if the post has already been created with same title
+    const existingBlog = await Blog.find({
+      title: { $regex: new RegExp(req.body.title, "i") },
+    });
+    if (existingBlog.length > 0)
+      return res.status(200).json({
+        success: false,
+        message: "Blog with same title already exists",
+      });
+
+    const reqBody = {
+      ...req.body,
+      image: fs.readFileSync(
+        path.join(__dirname, "../../uploads/") + req.file.filename
+      ),
+    };
+
+    const newBlogData = new Blog(reqBody); // create new blog document
+    await newBlogData.save(); // save new blog
+
+    return res.status(200).json({
+      success: true,
+      blog: newBlogData,
+      message: "Blog created successfully",
+    });
+  } catch (err) {
+    console.log("Error:", err);
+    return res.status(400).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+module.exports = {
+  getAllBlogController,
+  getOneBlogController,
+  createBlogController,
+};
