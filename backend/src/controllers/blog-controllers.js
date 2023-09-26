@@ -122,9 +122,35 @@ const updateBlogController = async (req, res) => {
   }
 };
 
+// delete a single blog post controller
+const deleteBlogController = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const result = await Blog.findOneAndDelete({ _id: blogId });
+
+    if (result) {
+      return res.status(200).json({
+        success: true,
+        message: "The blog has been deleted successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "The blog is not found",
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
 module.exports = {
   getAllBlogController,
   getOneBlogController,
   createBlogController,
   updateBlogController,
+  deleteBlogController,
 };
