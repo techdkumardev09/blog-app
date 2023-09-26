@@ -3,6 +3,8 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { dateFormat } from "./../../utils/constants";
+import ConfirmationModal from "../modal/ConfirmationModal";
+import PostModal from "../modal/PostModal";
 
 const BlogCard = ({
   title,
@@ -25,9 +27,9 @@ const BlogCard = ({
   return (
     <div className="flex h-[260px] md:w-[49%] h-[300px] sm:w-full bg-white relative shadow-lg rounded-lg my-5 overflow-hidden">
       <div className="overflow-hidden w-[30%] bg-gray-200 py-5  cursor-pointer">
-        <Link href={`/`}>
+        <Link href={`/blog-details/${id}`}>
           <img
-            src={image}
+            src={dataUrl}
             alt="Blog Image"
             className="w-full h-48 object-cover object-center"
           />
@@ -37,8 +39,9 @@ const BlogCard = ({
         <div className="p-6 relative w-full h-full min-h-[100px]">
           <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
           <p
-            className={`mt-4 text-gray-700 overflow-hidden ${isReadMore ? "max-h-[70px]" : "max-h-[50px]"
-              }`}
+            className={`mt-4 text-gray-700 overflow-hidden ${
+              isReadMore ? "max-h-[70px]" : "max-h-[50px]"
+            }`}
           >
             {content}
           </p>
@@ -50,25 +53,12 @@ const BlogCard = ({
               {isReadMore ? "Read Less" : "Read More"}
             </span>
           )}
-
-          <div className="my-5 flex gap- justify-end">
-            <span className="flex gap-2 text-gray-700 items-center pr-2 mr-2 border-r border-[#d1d1d1] cursor-pointer">
-              <img
-                className="w-8 h-8"
-                alt="edit"
-                src="https://cdn3.iconfinder.com/data/icons/user-interface-web-1/550/web-circle-circular-round_58-512.png"
-              />
-              Edit
-            </span>
-            <span className="flex gap-2 text-gray-700 items-center  cursor-pointer">
-              <img
-                className="w-8 h-8"
-                alt="delete"
-                src="https://cdn3.iconfinder.com/data/icons/social-messaging-ui-color-line/254000/127-512.png"
-              />
-              Delete
-            </span>
-          </div>
+          {isEditPage && (
+            <div className="my-5 flex gap- justify-end">
+              <PostModal isEditPage={true} isNoDataFoundModal={false} postId={id} editMode={true}/>
+              <ConfirmationModal id={id} delteUserBlog={delteUserBlog} />
+            </div>
+          )}
         </div>
       </div>
       <p className="text-sm text-gray-600 flex gap-2 items-center absolute right-0 bottom-0 w-full bg-[#faebd7] flex justify-center p-3">

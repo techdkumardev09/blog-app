@@ -1,9 +1,34 @@
 // pages/blog-details/[slug].js
+import { useRouter } from "next/router";
 import Layout from "../../components/layout/Layout";
 import Link from "next/link";
 import Meta from "../../utils/Meta";
+import { fetchBlogDataDetails } from "../../service/api";
+import { useState, useEffect } from "react";
+import { dateFormat } from "../../utils/constants";
+import Loader from "../../components/loader/Loader";
 
 export default function Post({ id }) {
+  const router = useRouter();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState(
+    "https://enviragallery.com/wp-content/uploads/2016/05/Set-Default-Featured-Image.jpg"
+  );
+
+  useEffect(() => {
+    // Fetch data when the component mounts
+    setLoading(true);
+    const data = fetchBlogDataDetails(id).then((result) => {
+      setData(result?.blog);
+      const base64ImageData = Buffer.from(result?.blog?.image?.data).toString(
+        "base64"
+      );
+      const dataUrl = `data:image/jpeg;base64,${base64ImageData}`;
+      setImageUrl(dataUrl);
+      setLoading(false);
+    });
+  }, []);
 
   return (
     <>
@@ -13,7 +38,9 @@ export default function Post({ id }) {
         canonical=""
       />
       <Layout>
-       
+        {loading ? (
+          <Loader />
+        ) : (
           <div className="max-w-[1200px] w-full mx-auto mt-10 mb-10">
             <div className="max-w-[1200px] flex mx-auto items-center mb-10 gap-2">
               <Link href="/" className="">
@@ -31,7 +58,7 @@ export default function Post({ id }) {
             <div className="w-full bg-[#faebd7] rounded-xl overflow-hidden">
               <div className="overflow-hidden w-full h-[300px] flex justify-center bg-black">
                 <img
-                  src="https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80"
+                  src={imageUrl}
                   alt="Blog Image"
                   className="w-auto h-full object-cover object-center"
                 />
@@ -39,7 +66,7 @@ export default function Post({ id }) {
               <div className="p-6 relative w-full h-full">
                 <div className="flex justify-between items-center">
                   <h3 className="text-xl font-semibold text-gray-800">
-                    {"Name of title"}
+                    {data.title}
                   </h3>
                   <p className="text-sm text-gray-600 flex gap-2 items-center flex justify-end p-3">
                     <img
@@ -48,23 +75,24 @@ export default function Post({ id }) {
                       src="https://img.freepik.com/premium-vector/business-global-economy_24877-41082.jpg"
                     />
                     <span className="border-r flex items-center border-[#d1d1d1] pr-2 h-8">
-                      {"max of kargo"}
+                      {data.authorName}
                     </span>
                     <img
                       className="w-10 h-10 rounded-full"
                       alt="Blog date"
                       src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
                     />
-                    {/* {new Date(data.createdAt).toLocaleDateString(
+                    {new Date(data.createdAt).toLocaleDateString(
                       "en-US",
                       dateFormat
-                    )} */}
+                    )}
                   </p>
                 </div>
-                <p className="mt-4 text-gray-700">"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."</p>
+                <p className="mt-4 text-gray-700">{data.description}</p>
               </div>
             </div>
           </div>
+        )}
       </Layout>
     </>
   );

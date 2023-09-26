@@ -1,9 +1,23 @@
-import React from 'react';
-import Layout from '../components/layout/Layout'
-import Meta from '../utils/Meta';
-import BlogCard from '../components/cards/BlogCard';
+import React, { useEffect, useState } from "react";
+import BlogCard from "../components/cards/BlogCard";
+import Layout from "../components/layout/Layout";
+import { fetchData } from "../service/api";
+import NoDataFound from "../components/NoDataFoundCard";
+import Meta from "../utils/Meta";
+import Loader from "../components/loader/Loader";
 
 export default function Home() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch data when the component mounts
+    const data = fetchData().then((result) => {
+      setData(result?.blogs);
+      setLoading(false);
+    });
+  }, []);
+
   return (
     <>
       <Meta
@@ -12,19 +26,38 @@ export default function Home() {
         canonical=""
       />
       <Layout>
-        <BlogCard
-          key={"1"}
-          title={"Blog Title"}
-          author={"max-wander"}
-          date={"778455874.255488"}
-          content={"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."}
-          image={"https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&w=1000&q=80"}
-          isEditPage={false}
-          id={78}
-        />
+        {loading ? (
+          <Loader />
+        ) : (
+          <div className="container mx-auto mt-10">
+            <div className="max-w-[1200px] flex justify-between mx-auto items-center mb-4">
+              <h2 className="text-2xl font-semibold text-black"> Blogs</h2>
+            </div>
+            {data?.length > 0 ? (
+              <>
+                <div className="flex flex-wrap justify-between">
+                  {data?.map((item) => {
+                    return (
+                      <BlogCard
+                        key={item?._id}
+                        title={item?.title}
+                        author={item?.authorName}
+                        date={item?.createdAt}
+                        content={item?.description}
+                        image={item?.image?.data}
+                        isEditPage={false}
+                        id={item._id}
+                      />
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <NoDataFound />
+            )}
+          </div>
+        )}
       </Layout>
     </>
-
-
-  )
+  );
 }

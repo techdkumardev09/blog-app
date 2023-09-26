@@ -29,3 +29,6 @@ a {
     background: lightgoldenrodyellow;
   }
 }
+.error {
+  color: red;
+}
